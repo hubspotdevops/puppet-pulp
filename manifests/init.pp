@@ -50,6 +50,8 @@
 #
 # $reset_cache::                Boolean to flush the cache. Defaults to false
 #
+# $qpid_manage::                If this class should manage qpid class
+#
 # $qpid_ssl_cert_db             The location of the Qpid SSL cert database
 #
 # $qpid_ssl_cert_password_file  Location of the password file for the Qpid SSL cert
@@ -91,6 +93,7 @@ class pulp (
   $reset_data = false,
   $reset_cache = false,
 
+  $qpid_manage      = true,
   $qpid_ssl_cert_db = $pulp::params::qpid_ssl_cert_db,
   $qpid_ssl_cert_password_file = $pulp::params::qpid_ssl_cert_password_file,
 
@@ -117,14 +120,18 @@ class pulp (
     logpath     => '/var/log/mongodb/mongodb.log',
     dbpath      => '/var/lib/mongodb',
     pidfilepath => $mongodb_pidfilepath,
-  } ~>
-  class { 'qpid':
-    ssl                    => true,
-    ssl_cert_db            => $qpid_ssl_cert_db,
-    ssl_cert_password_file => $qpid_ssl_cert_password_file,
-    ssl_cert_name          => 'broker',
-    user_groups            => $pulp::user_groups
-  } ~>
+  }
+
+  if $qpid_manage {
+    class { 'qpid':
+      ssl                    => true,
+      ssl_cert_db            => $qpid_ssl_cert_db,
+      ssl_cert_password_file => $qpid_ssl_cert_password_file,
+      ssl_cert_name          => 'broker',
+      user_groups            => $pulp::user_groups
+    }
+  }
+
   # Make sure we install the mongodb client, used by service-wait to check
   # that the server is up.
   class {'::mongodb::client':} ~>
