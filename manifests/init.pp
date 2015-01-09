@@ -105,6 +105,7 @@ class pulp (
   ) inherits pulp::params {
 
   include ::apache
+  include ::apache::mod::ssl
 
   if (versioncmp($::mongodb_version, '2.6.5') >= 0) {
     $mongodb_pidfilepath = '/var/run/mongodb/mongod.pid'
